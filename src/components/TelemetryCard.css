@@ -1,0 +1,88 @@
+.telemetry-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.telemetry-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 168, 232, 0.25);
+}
+
+.telemetry-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 10px rgba(0, 168, 232, 0.15);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.icon-wrapper {
+    padding: 0.75rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.card-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.unit {
+    font-size: 1rem;
+    opacity: 0.7;
+    font-weight: 600;
+}
+
+.trend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.trend.normal {
+    background: rgba(0, 200, 83, 0.1);
+    color: var(--success-color);
+}
+
+.trend.warning {
+    background: rgba(255, 167, 38, 0.1);
+    color: var(--warning-color);
+}
+
+.trend.critical {
+    background: rgba(244, 67, 54, 0.1);
+    color: var(--danger-color);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+    .value {
+        font-size: 2rem;
+    }
+}
