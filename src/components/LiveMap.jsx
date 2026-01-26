@@ -1,135 +1,112 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import { useMemo, useEffect } from 'react';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
+import { useEffect, useState } from 'react';
+import { Layers, Map as MapIcon } from 'lucide-react';
+import clsx from 'clsx';
 
-// Fix for default marker icons in react-leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const MAP_ID = "DEMO_MAP_ID";
 
-// Helper to get color for boat
-const getBoatColor = (boatId) => {
-    // Specific colors for known prototypes
-    if (boatId === 'PROTOTYPE_001') return '#00a8e8'; // Blue
-    if (boatId === 'PROTOTYPE_002') return '#00c853'; // Green
+export default function LiveMap({ boatsData, selectedBoatId, onBoatSelect }) {
+    const defaultPosition = { lat: 6.5244, lng: 3.3792 }; // Lagos
+    const [mapTypeId, setMapTypeId] = useState('roadmap'); // roadmap, satellite, hybrid, terrain
 
-    // Hash-based color for others
-    let hash = 0;
-    for (let i = 0; i < boatId.length; i++) {
-        hash = boatId.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-    return '#' + '00000'.substring(0, 6 - c.length) + c;
-};
-
-// Function to create colored icon
-const createBoatIcon = (color) => {
-    return new L.DivIcon({
-        className: 'boat-beacon',
-        html: `
-            <div class="beacon-pulse" style="background: ${color}4D"></div>
-            <div class="nav-arrow" style="background: ${color}; border-color: white;"></div>
-        `,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-        popupAnchor: [0, -12]
-    });
-};
-
-// Helper component to auto-center map
-function ChangeView({ center }) {
-    const map = useMap();
-    useEffect(() => {
-        map.setView(center);
-    }, [center, map]);
-    return null;
-}
-
-export default function LiveMap({ boatsData, selectedBoatId, onBoatSelect, history }) {
-    // Default center (Lagos, Nigeria)
-    const defaultCenter = [6.5244, 3.3792];
-
-    // Get selected boat data
+    // Compute center based on selected boat
     const selectedBoat = boatsData && selectedBoatId ? boatsData[selectedBoatId] : null;
-
-    // Center map on selected boat
-    const centerPosition = selectedBoat?.location?.latitude && selectedBoat?.location?.longitude
-        ? [selectedBoat.location.latitude, selectedBoat.location.longitude]
-        : defaultCenter;
-
-    // Trail path for selected boat
-    const trail = useMemo(() => {
-        if (!history || history.length === 0) return [];
-        return history
-            .filter(d => d.location && d.location.latitude && d.location.longitude)
-            .map(d => [d.location.latitude, d.location.longitude]);
-    }, [history]);
+    const center = selectedBoat?.location?.latitude
+        ? { lat: selectedBoat.location.latitude, lng: selectedBoat.location.longitude }
+        : defaultPosition;
 
     return (
-        <div style={{ height: '100%', width: '100%', minHeight: '400px', borderRadius: '12px', overflow: 'hidden' }}>
-            <MapContainer
-                center={centerPosition}
-                zoom={15}
-                style={{ height: '100%', width: '100%' }}
-                scrollWheelZoom={true}
-            >
-                <ChangeView center={centerPosition} />
+        <APIProvider apiKey={API_KEY}>
+            <div className="w-full h-full rounded-xl overflow-hidden border border-gray-800 relative group">
+                <Map
+                    defaultCenter={defaultPosition}
+                    defaultZoom={15}
+                    mapId={MAP_ID}
+                    mapTypeId={mapTypeId}
+                    gestureHandling={'greedy'}
+                    disableDefaultUI={true}
+                    style={{ width: '100%', height: '100%' }}
+                    className="w-full h-full"
+                >
+                    <RecenterMap center={center} />
 
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+                    {/* Render Boats */}
+                    {Object.values(boatsData || {}).map(boat => {
+                        const lat = Number(boat.location?.latitude);
+                        const lng = Number(boat.location?.longitude);
 
-                {/* Trail for selected boat */}
-                {trail.length > 1 && (
-                    <Polyline
-                        positions={trail}
-                        pathOptions={{
-                            color: selectedBoatId ? getBoatColor(selectedBoatId) : '#00a8e8',
-                            weight: 3,
-                            opacity: 0.6,
-                            dashArray: '5, 10'
-                        }}
-                    />
-                )}
+                        // Skip if invalid coordinates
+                        if (isNaN(lat) || isNaN(lng)) return null;
 
-                {/* Render ALL boats */}
-                {Object.values(boatsData || {}).map(boat => {
-                    const pos = [boat.location.latitude, boat.location.longitude];
-                    if (!pos[0] || !pos[1]) return null;
+                        const pos = { lat, lng };
+                        const isSelected = boat.boat_id === selectedBoatId;
 
-                    const isSelected = boat.boat_id === selectedBoatId;
-                    const color = getBoatColor(boat.boat_id);
+                        return (
+                            <AdvancedMarker
+                                key={boat.boat_id}
+                                position={pos}
+                                onClick={() => onBoatSelect(boat.boat_id)}
+                                title={boat.boat_id}
+                                zIndex={isSelected ? 100 : 1}
+                            >
+                                <div className="relative flex items-center justify-center group/marker">
+                                    {/* Pulse effect for selected/active */}
+                                    <div className={clsx(
+                                        "absolute w-8 h-8 rounded-full opacity-50 transition-all",
+                                        isSelected ? "bg-blue-500 animate-ping" : "bg-gray-500 group-hover/marker:bg-gray-400"
+                                    )}></div>
 
-                    return (
-                        <Marker
-                            key={boat.boat_id}
-                            position={pos}
-                            icon={createBoatIcon(color)}
-                            eventHandlers={{
-                                click: () => onBoatSelect(boat.boat_id),
-                            }}
-                            opacity={isSelected ? 1 : 0.6} // Fade out unselected boats
-                        >
-                            <Popup>
-                                <div style={{ minWidth: '200px' }}>
-                                    <h3 style={{ marginBottom: '0.5rem', color: color }}>
+                                    {/* Boat Icon/Dot */}
+                                    <div className={clsx(
+                                        "relative w-4 h-4 rounded-full border-2 border-white shadow-lg transition-transform duration-300",
+                                        isSelected ? "bg-blue-600 scale-125" : "bg-gray-600"
+                                    )}></div>
+
+                                    {/* Label */}
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover/marker:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm">
                                         {boat.boat_id}
-                                    </h3>
-                                    <div style={{ fontSize: '0.875rem' }}>
-                                        <p><strong>Speed:</strong> {boat.location?.speed?.toFixed(1) || '0'} km/h</p>
-                                        <p><strong>Status:</strong> {isSelected ? 'Selected' : 'Click to Select'}</p>
                                     </div>
                                 </div>
-                            </Popup>
-                        </Marker>
-                    );
-                })}
-            </MapContainer>
-        </div>
+                            </AdvancedMarker>
+                        )
+                    })}
+                </Map>
+
+                {/* Map Controls */}
+                <div className="absolute top-4 right-4 flex flex-col gap-2 bg-card/90 backdrop-blur border border-gray-700 p-1 rounded-lg shadow-xl z-10">
+                    <button
+                        onClick={() => setMapTypeId('roadmap')}
+                        className={clsx(
+                            "p-2 rounded-md transition-colors",
+                            mapTypeId === 'roadmap' ? "bg-primary text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
+                        )}
+                        title="Map View"
+                    >
+                        <MapIcon size={20} />
+                    </button>
+                    <button
+                        onClick={() => setMapTypeId('hybrid')}
+                        className={clsx(
+                            "p-2 rounded-md transition-colors",
+                            mapTypeId === 'hybrid' ? "bg-primary text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
+                        )}
+                        title="Satellite View"
+                    >
+                        <Layers size={20} />
+                    </button>
+                </div>
+            </div>
+        </APIProvider>
     );
+}
+
+function RecenterMap({ center }) {
+    const map = useMap();
+    useEffect(() => {
+        if (map && center && center.lat && center.lng) {
+            map.panTo(center);
+        }
+    }, [map, center]);
+    return null;
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { io } from 'socket.io-client'
 import Dashboard from './pages/Dashboard'
-import './App.css'
 
 // Use environment variable for production, fallback to localhost for dev
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
