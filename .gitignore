@@ -36,6 +36,5 @@ ipch/
 supabase/functions/*/deno.lock
 
 # Build outputs
-/dashboard/dist
-/dashboard/.vercel
-/backend/dist
+/dist
+/.vercel

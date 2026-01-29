@@ -42,7 +42,10 @@ export default function Dashboard({ connected, telemetryData, alerts }) {
     // Calculate Aggregate Stats
     const boats = Object.values(boatsData);
     const totalBoats = boats.length;
-    const onlineBoats = connected ? totalBoats : 0;
+    // Count boats that are NOT explicitly offline
+    const onlineBoats = connected
+        ? boats.filter(b => (b.network?.status || 'ONLINE') !== 'OFFLINE').length
+        : 0;
     const criticalAlerts = alerts.filter(a => a.type === 'critical' || a.type === 'battery_low').length;
 
     const selectedBoat = boatsData[selectedBoatId];

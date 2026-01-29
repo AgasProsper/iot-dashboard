@@ -35,6 +35,22 @@ export default function FleetList({ boatsData, selectedBoatId, onSelect }) {
                                 const battery = boat.sensors?.battery?.percentage || 0;
                                 const isCritical = battery < 20;
 
+                                // Network Status Logic
+                                const netStatus = boat.network?.status || "ONLINE"; // Default to existing behavior
+                                const signal = boat.network?.signal_strength ?? 100;
+                                const buffered = boat.network?.buffered_packets || 0;
+
+                                let statusColor = "bg-green-500/20 text-green-400";
+                                let statusText = "Online";
+
+                                if (netStatus === "OFFLINE") {
+                                    statusColor = "bg-red-500/20 text-red-400";
+                                    statusText = "Offline";
+                                } else if (netStatus === "POOR") {
+                                    statusColor = "bg-yellow-500/20 text-yellow-400";
+                                    statusText = "Poor Signal";
+                                }
+
                                 return (
                                     <tr
                                         key={boat.boat_id}
@@ -45,13 +61,23 @@ export default function FleetList({ boatsData, selectedBoatId, onSelect }) {
                                         )}
                                     >
                                         <td className="p-4 font-medium text-white flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                            {boat.boat_id}
+                                            <div className={clsx("w-2 h-2 rounded-full", netStatus === "OFFLINE" ? "bg-gray-500" : "bg-blue-500")}></div>
+                                            <div>
+                                                {boat.boat_id}
+                                                {buffered > 0 && <div className="text-[10px] text-yellow-500">{buffered} pkts buffered</div>}
+                                            </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
-                                                Online
-                                            </span>
+                                            <div className="flex flex-col gap-1">
+                                                <span className={clsx("inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit", statusColor)}>
+                                                    {statusText}
+                                                </span>
+                                                {netStatus !== "OFFLINE" && (
+                                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                        <Signal size={12} /> {signal}%
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-2">
