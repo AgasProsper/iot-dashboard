@@ -5,6 +5,7 @@ import MetricCard from '../components/MetricCard';
 import FleetList from '../components/FleetList';
 import DeviceDetails from '../components/DeviceDetails';
 import Layout from '../components/Layout';
+import EnvironmentWidget from '../components/EnvironmentWidget';
 
 export default function Dashboard({ connected, telemetryData, alerts }) {
     const [boatsData, setBoatsData] = useState({});
@@ -49,24 +50,25 @@ export default function Dashboard({ connected, telemetryData, alerts }) {
     const criticalAlerts = alerts.filter(a => a.type === 'critical' || a.type === 'battery_low').length;
 
     const selectedBoat = boatsData[selectedBoatId];
+    // Use selected boat location for weather, or default to a central location if needed
+    const fleetLocation = selectedBoat?.location || { latitude: 6.5244, longitude: 3.3792 }; // Default: Lagos
 
     return (
         <Layout connected={connected}>
             <div className="p-4 md:p-6 h-full flex flex-col gap-6 max-w-[1920px] mx-auto">
                 {/* 1. Top Bar: Aggregate Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <MetricCard
                         title="Total Fleet"
                         value={totalBoats}
                         icon={<Ship size={20} />}
                         color="primary"
                     />
-                    <MetricCard
-                        title="Online"
-                        value={onlineBoats}
-                        icon={<Wifi size={20} />}
-                        color="success"
-                    />
+                    {/* Replace "Online" with Weather Widget for richer context */}
+                    <div className="md:col-span-1">
+                        <EnvironmentWidget location={fleetLocation} />
+                    </div>
+
                     <MetricCard
                         title="Alerts"
                         value={criticalAlerts}
