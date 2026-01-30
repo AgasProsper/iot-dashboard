@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, LineChart, Bell, Battery, Thermometer, Droplets, Navigation, Clock, Activity, Zap, Brain, Wrench, TrendingUp, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, LineChart, Bell, Battery, Thermometer, Droplets, Navigation, Clock, Activity, Zap, Brain, Wrench, TrendingUp, AlertTriangle, MapPin } from 'lucide-react';
 import MetricCard from './MetricCard';
 import TelemetryChart from './TelemetryChart';
 import clsx from 'clsx';
