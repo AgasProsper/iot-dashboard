@@ -19,7 +19,7 @@ export default function MetricCard({ title, value, unit, icon, trend, subtext, c
                 color === 'danger' && "bg-red-500/20 text-red-500",
                 color === 'warning' && "bg-yellow-500/20 text-yellow-500",
                 color === 'success' && "bg-green-500/20 text-green-500",
-                color === 'primary' || !color && "bg-blue-500/20 text-blue-500",
+                (color === 'primary' || !color) && "bg-blue-500/20 text-blue-500",
             )}>
                 {icon}
             </div>
