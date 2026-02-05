@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Ship, Wifi, WifiOff, Activity, Droplets, Thermometer, Battery } from 'lucide-react';
-import LiveMap from '../components/LiveMap';
+import { Ship, Wifi, WifiOff, Activity, Droplets, Thermometer, Battery, CloudRain } from 'lucide-react';
+import GoogleMap from '../components/GoogleMap';
 import TelemetryCard from '../components/TelemetryCard';
 import ChartPanel from '../components/ChartPanel';
 import AlertsPanel from '../components/AlertsPanel';
 import Analytics from '../components/Analytics';
+import AIInsights from '../components/AIInsights';
 import './Dashboard.css';
 
 export default function Dashboard({ connected, telemetryData, alerts, socket }) {
@@ -88,6 +89,13 @@ export default function Dashboard({ connected, telemetryData, alerts, socket }) 
                             </select>
                         </div>
 
+                        {/* Active Boats Counter */}
+                        <div className="active-boats-counter">
+                            <Ship size={18} />
+                            <span className="counter-value">{Object.keys(boatsData).length}</span>
+                            <span className="counter-label">Active</span>
+                        </div>
+
                         <div className="connection-status" style={{ borderColor: getStatusColor() }}>
                             {connected ? <Wifi size={20} /> : <WifiOff size={20} />}
                             <span style={{ color: getStatusColor() }}>{getStatusText()}</span>
@@ -109,7 +117,7 @@ export default function Dashboard({ connected, telemetryData, alerts, socket }) 
                             Live Location Tracking
                         </h2>
                         {/* Pass ALL boats data to map, and current selection */}
-                        <LiveMap
+                        <GoogleMap
                             boatsData={boatsData}
                             selectedBoatId={selectedBoatId}
                             onBoatSelect={handleBoatSelect}
@@ -120,11 +128,12 @@ export default function Dashboard({ connected, telemetryData, alerts, socket }) 
                     <div className="status-panel">
                         <TelemetryCard
                             icon={<Thermometer size={24} />}
-                            title="Temperature"
+                            title="Engine Temperature"
                             value={selectedBoatData?.sensors?.temperature || '--'}
                             unit="°C"
                             color="#ff6b6b"
                             trend={selectedBoatData?.sensors?.temperature > 35 ? 'warning' : 'normal'}
+                            showProgress={true}
                         />
 
                         <TelemetryCard
@@ -136,16 +145,9 @@ export default function Dashboard({ connected, telemetryData, alerts, socket }) 
                         />
 
                         <TelemetryCard
-                            icon={<Droplets size={24} />}
-                            title="Water Detection"
-                            value={
-                                <div>
-                                    {selectedBoatData?.sensors?.rain_status || '--'}
-                                    <span style={{ fontSize: '0.6em', color: '#999', display: 'block' }}>
-                                        (Raw: {selectedBoatData?.sensors?.rain_value || 0})
-                                    </span>
-                                </div>
-                            }
+                            icon={<CloudRain size={24} />}
+                            title="Rain"
+                            value={selectedBoatData?.sensors?.rain_status || '--'}
                             unit=""
                             color={
                                 selectedBoatData?.sensors?.rain_status === 'WATER DETECTED' ? '#f44336' : '#00c853'
@@ -163,6 +165,7 @@ export default function Dashboard({ connected, telemetryData, alerts, socket }) 
                                     selectedBoatData?.sensors?.battery?.percentage > 20 ? '#ffa726' : '#f44336'
                             }
                             trend={selectedBoatData?.sensors?.battery?.percentage < 20 ? 'critical' : 'normal'}
+                            showProgress={true}
                         />
 
                         <TelemetryCard
@@ -185,6 +188,11 @@ export default function Dashboard({ connected, telemetryData, alerts, socket }) 
                     <Analytics telemetryData={selectedBoatData} history={history} />
                     <AlertsPanel alerts={alerts} />
                 </div>
+            </div>
+
+            {/* AI Insights Section */}
+            <div className="ai-section">
+                <AIInsights />
             </div>
 
             {/* Footer */}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { io } from 'socket.io-client'
 import Dashboard from './pages/Dashboard'
+import QuickChat from './components/QuickChat'
 import './App.css'
 
 // Use environment variable for production, fallback to localhost for dev
@@ -65,6 +66,7 @@ function App() {
                 alerts={alerts}
                 socket={socket}
             />
+            <QuickChat />
         </div>
     )
 }

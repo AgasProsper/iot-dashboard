@@ -81,9 +81,9 @@ export default function ChartPanel({ history }) {
                     </ResponsiveContainer>
                 </div>
 
-                {/* Temperature Chart */}
+                {/* Engine Temperature Chart */}
                 <div className="chart-container">
-                    <h3 className="chart-title">Temperature</h3>
+                    <h3 className="chart-title">Engine Temperature</h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <LineChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e4976" />
@@ -96,7 +96,7 @@ export default function ChartPanel({ history }) {
                                 stroke="#ff6b6b"
                                 strokeWidth={3}
                                 dot={false}
-                                name="Temperature"
+                                name="Engine Temperature"
                                 unit="°C"
                             />
                         </LineChart>

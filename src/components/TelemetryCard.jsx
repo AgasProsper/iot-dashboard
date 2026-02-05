@@ -1,13 +1,17 @@
 import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
 import './TelemetryCard.css';
 
-export default function TelemetryCard({ icon, title, value, unit, color, trend }) {
+export default function TelemetryCard({ icon, title, value, unit, color, trend, showProgress }) {
     const getTrendIcon = () => {
         if (trend === 'warning' || trend === 'critical') {
             return <AlertCircle size={16} color="#ffa726" />;
         }
         return null;
     };
+
+    // Determine if we should show progress bar (for percentage values)
+    const numericValue = typeof value === 'number' ? value : null;
+    const shouldShowProgress = showProgress && numericValue !== null;
 
     return (
         <div className="telemetry-card card">
@@ -22,6 +26,18 @@ export default function TelemetryCard({ icon, title, value, unit, color, trend }
                 <span className="value">{typeof value === 'number' ? value.toFixed(1) : value}</span>
                 <span className="unit">{unit}</span>
             </div>
+
+            {shouldShowProgress && (
+                <div className="progress-bar-container">
+                    <div
+                        className="progress-bar"
+                        style={{
+                            width: `${Math.min(numericValue, 100)}%`,
+                            background: `linear-gradient(90deg, ${color}, ${color}dd)`
+                        }}
+                    />
+                </div>
+            )}
 
             {trend && (
                 <div className={`trend ${trend}`}>
