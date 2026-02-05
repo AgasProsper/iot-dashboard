@@ -103,8 +103,8 @@
 }
 
 .quick-questions {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     width: 100%;
     margin-top: 1rem;
@@ -118,7 +118,8 @@
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
+    text-align: left;
 }
 
 .quick-question-btn:hover {

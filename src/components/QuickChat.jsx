@@ -8,7 +8,7 @@ export default function QuickChat() {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const API_BASE = 'http://localhost:3001';
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
     const askQuestion = async () => {
         if (!question.trim() || loading) return;
@@ -53,7 +53,11 @@ export default function QuickChat() {
         "Which boats need attention?",
         "What's the fleet status?",
         "Any critical issues?",
-        "Battery levels?"
+        "What are the battery levels?",
+        "Which boat has the lowest battery?",
+        "Are there any engine problems?",
+        "What maintenance is needed?",
+        "Is any boat moving?"
     ];
 
     return (

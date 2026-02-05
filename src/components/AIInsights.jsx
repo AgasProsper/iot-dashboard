@@ -16,13 +16,10 @@ export default function AIInsights() {
     });
     const [activeTab, setActiveTab] = useState('insights');
 
-    const API_BASE = 'http://localhost:3001';
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
     useEffect(() => {
-        // Initial load only - no auto-refresh to save tokens
-        fetchInsights();
-        fetchAnomalies();
-        fetchRecommendations();
+        // No auto-load - user must click refresh buttons to save tokens
     }, []);
 
     const fetchInsights = async () => {
